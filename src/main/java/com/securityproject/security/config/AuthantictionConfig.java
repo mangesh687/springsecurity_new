@@ -67,7 +67,7 @@ public class AuthantictionConfig {
         http.authorizeHttpRequests(configurer ->
                 configurer
                         .requestMatchers("/api/auth/**","/swagger-ui/**", "/v3/api-docs/**",
-                                "/swagger-resources/**", "/webjars/**", "/docs","/home").permitAll()
+                                "/swagger-resources/**", "/webjars/**", "/docs","/api/auth/home").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                         );
