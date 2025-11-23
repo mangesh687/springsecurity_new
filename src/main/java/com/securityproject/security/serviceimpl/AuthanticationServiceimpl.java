@@ -1,17 +1,23 @@
 package com.securityproject.security.serviceimpl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.securityproject.security.Entity.Authority;
 import com.securityproject.security.Entity.User;
 import com.securityproject.security.repository.UserRepository;
+import com.securityproject.security.request.AuthenticationRequest;
 import com.securityproject.security.request.RegistorRequest;
+import com.securityproject.security.response.AuthanticationResponse;
 import com.securityproject.security.service.AuthanticationService;
+import com.securityproject.security.service.Jwtservice;
 
 import jakarta.transaction.Transactional;
 
@@ -21,6 +27,10 @@ public class AuthanticationServiceimpl implements AuthanticationService {
 	private UserRepository userRepository;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	@Autowired
+	private Jwtservice jwtservice;
 
 	@Override
 	@Transactional
@@ -54,6 +64,16 @@ public class AuthanticationServiceimpl implements AuthanticationService {
 		}
 		return auth;
 		
+	}
+	@Override
+	@Transactional
+	public AuthanticationResponse login(AuthenticationRequest request) {
+		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+				);
+		User user=userRepository.findByEmail(request.getEmail())
+				.orElseThrow(()->new IllegalArgumentException("invalid email or passwords"));
+		String jwtToken=jwtservice.generatedToken(new HashMap<>(), user);
+		return new AuthanticationResponse(jwtToken);
 	}
 	
 

@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.securityproject.security.request.AuthenticationRequest;
 import com.securityproject.security.request.RegistorRequest;
+import com.securityproject.security.response.AuthanticationResponse;
 import com.securityproject.security.serviceimpl.AuthanticationServiceimpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +34,14 @@ public class AuthantitionController {
 	public void register(@Valid @RequestBody RegistorRequest registorRequest) throws Exception {
 		authanticationServiceimpl.register(registorRequest);
 	}
+	@PostMapping("/login")
+	@ResponseStatus(HttpStatus.OK)
+	@Operation(summary = "login a user", description = "submit email & password to authentication user")
+	public AuthanticationResponse login(@Valid @RequestBody AuthenticationRequest authenticationRequest) {
+		return authanticationServiceimpl.login(authenticationRequest);
+	}
+	
+	
 	@GetMapping("/home")
 	public String home() {
 		return "this is new home page";
