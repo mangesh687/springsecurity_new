@@ -3,12 +3,14 @@ package com.securityproject.security.Entity;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.jspecify.annotations.Nullable;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -20,117 +22,120 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinColumns;
 import jakarta.persistence.OneToMany;
+
 @Entity
 public class User implements UserDetails {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(nullable = false)
-	private long id;
-	@Column(nullable = false)
-	private String firstname;
-	@Column(nullable = false)
-	private String lastname;
-	@Column(nullable = false)
-	private String email;
-	@Column(nullable = false)
-	private String password;
-	@CreatedBy
-	@Column(updatable=false, name = "created_at" )
-	private Date createdAt;
-	@UpdateTimestamp
-	@Column(name = "updated_at")
-	private Date updateAt;
-	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name="user_authorities", joinColumns = @JoinColumn(name="user_id") )
-	private List<Authority> authorities;
-	@OneToMany(mappedBy = "owner",cascade = CascadeType.ALL,orphanRemoval = true)
-	private List<Todo> todo;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(nullable = false)
+    private long id;
 
+    @Column(nullable = false)
+    private String firstname;
 
+    @Column(nullable = false)
+    private String lastname;
 
-	public User() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+    @Column(nullable = false, unique = true)
+    private String email;
 
-	public User(long id, String firstname, String lastname, String email, String password, List<Authority> authorities,
-			List<Todo> todo) {
-		super();
-		this.id = id;
-		this.firstname = firstname;
-		this.lastname = lastname;
-		this.email = email;
-		this.password = password;
-		this.authorities = authorities;
-		this.todo = todo;
-	}
+    @JsonIgnore
+    @Column(nullable = false)
+    private String password;
 
-	public long getId() {
-		return id;
-	}
+    @CreationTimestamp
+    @Column(updatable = false, name = "created_at")
+    private Date createdAt;
 
-	public void setId(long id) {
-		this.id = id;
-	}
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Date updateAt;
 
-	public String getFirstname() {
-		return firstname;
-	}
+    // If Authority is embeddable and implements GrantedAuthority, this is OK.
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_authorities", joinColumns = @JoinColumn(name = "user_id"))
+    private List<Authority> authorities;
 
-	public void setFirstname(String firstname) {
-		this.firstname = firstname;
-	}
+    // default fetch type for OneToMany is LAZY. Hide from JSON to avoid lazy-init problems.
+    @JsonIgnore
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Todo> todo;
 
-	public String getLastname() {
-		return lastname;
-	}
+    public User() {}
 
-	public void setLastname(String lastname) {
-		this.lastname = lastname;
-	}
+    public User(long id, String firstname, String lastname, String email, String password,
+                List<Authority> authorities, List<Todo> todo) {
+        this.id = id;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.email = email;
+        this.password = password;
+        this.authorities = authorities;
+        this.todo = todo;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    // getters/setters
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public String getFirstname() { return firstname; }
+    public void setFirstname(String firstname) { this.firstname = firstname; }
 
-	public List<Todo> getTodo() {
-		return todo;
-	}
+    public String getLastname() { return lastname; }
+    public void setLastname(String lastname) { this.lastname = lastname; }
 
-	public void setTodo(List<Todo> todo) {
-		this.todo = todo;
-	}
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public List<Todo> getTodo() { return todo; }
+    public void setTodo(List<Todo> todo) { this.todo = todo; }
 
-	public void setAuthorities(List<Authority> authorities) {
-		this.authorities = authorities;
-	}
+    public void setPassword(String password) { this.password = password; }
+    public void setAuthorities(List<Authority> authorities) { this.authorities = authorities; }
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		// TODO Auto-generated method stub
-		return authorities;
-	}
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
 
-	@Override
-	public @Nullable String getPassword() {
-		// TODO Auto-generated method stub
-		return password;
-	}
+    @Override
+    @JsonIgnore // never expose password in JSON
+    public String getPassword() {
+        return password;
+    }
 
-	@Override
-	public String getUsername() {
-		// TODO Auto-generated method stub
-		return email;
-	}
+    @Override
+    public String getUsername() {
+        return email;
+    }
 
+    // Implementation of remaining UserDetails methods.
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+
+    @Override
+    public boolean isEnabled() { return true; }
+
+    // createdAt / updateAt getters (if needed)
+    public Date getCreatedAt() { return createdAt; }
+    public Date getUpdateAt() { return updateAt; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        return id != 0 && Objects.equals(id, ((User) o).id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

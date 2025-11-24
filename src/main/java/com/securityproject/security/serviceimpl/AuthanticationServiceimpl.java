@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.securityproject.security.Entity.Authority;
 import com.securityproject.security.Entity.User;
@@ -19,7 +20,7 @@ import com.securityproject.security.response.AuthanticationResponse;
 import com.securityproject.security.service.AuthanticationService;
 import com.securityproject.security.service.Jwtservice;
 
-import jakarta.transaction.Transactional;
+
 
 @Service
 public class AuthanticationServiceimpl implements AuthanticationService {
@@ -66,7 +67,7 @@ public class AuthanticationServiceimpl implements AuthanticationService {
 		
 	}
 	@Override
-	@Transactional
+	@Transactional(readOnly = true)
 	public AuthanticationResponse login(AuthenticationRequest request) {
 		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
 				);
