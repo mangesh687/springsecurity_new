@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.securityproject.security.Entity.User;
+import com.securityproject.security.response.UserResponse;
 import com.securityproject.security.serviceimpl.UserServiceimpl;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,7 +18,7 @@ public class UserController {
 	@Autowired
 	private UserServiceimpl serviceimpl;
 	@GetMapping("/info")
-	public User getUserInfo() {
+	public UserResponse getUserInfo() {
 		return serviceimpl.getUserInfo();
 	}
 
